@@ -1,0 +1,43 @@
+# Ports are offset from the Neo4j defaults so this doesn't clash with a local Neo4j you may already run.
+services:
+  # Experiment 1: Neo4j Enterprise with Virtual Graph over the Fabric warehouse (generic JDBC)
+  neo4j-vg:
+    image: neo4j:2026.10.1-enterprise
+    container_name: neo4j-vg
+    ports:
+      - "127.0.0.1:${VG_HTTP_PORT:-17474}:7474"
+      - "127.0.0.1:${VG_BOLT_PORT:-17687}:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: ${NEO4J_ACCEPT_LICENSE_AGREEMENT:?see README}
+      NEO4J_internal_virtual__graph_enabled: "true"
+      NEO4J_internal_virtual__graph_home: /vg
+      # send JDBC driver / Hikari logs to debug.log
+      NEO4J_server_jvm_additional: -Dorg.neo4j.server.Bootstrapper.useNeo4jSlf4jProvider=true
+      NEO4J_internal_server_logs_filter_slf4j__class__prefixes: com.zaxxer.hikari, com.microsoft.sqlserver
+    volumes:
+      - ./vg/home:/vg:ro
+      # mount the driver JAR on its own; mounting over lib/ breaks startup.
+      # not :ro, the entrypoint chowns lib/
+      - ./vg/lib/mssql-jdbc-12.10.0.jre11.jar:/var/lib/neo4j/lib/mssql-jdbc-12.10.0.jre11.jar
+      - ./logs/vg:/logs
+
+  # Experiment 2: plain Enterprise instance hosting the composite database `contracts360`
+  # with remote aliases to AuraDB and to neo4j-vg
+  neo4j-router:
+    image: neo4j:2026.10.1-enterprise
+    container_name: neo4j-router
+    depends_on: [neo4j-vg]
+    ports:
+      - "127.0.0.1:${ROUTER_HTTP_PORT:-27474}:7474"
+      - "127.0.0.1:${ROUTER_BOLT_PORT:-27687}:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD}
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: ${NEO4J_ACCEPT_LICENSE_AGREEMENT:?see README}
+      # encrypts the remote alias credentials stored in the system database
+      NEO4J_dbms_security_keystore_path: /keystore/aliases.pkcs12
+      NEO4J_dbms_security_keystore_password: ${KEYSTORE_PASSWORD}
+      NEO4J_dbms_security_key_name: aliases-key
+    volumes:
+      - ./router/keystore:/keystore
+      - ./logs/router:/logs

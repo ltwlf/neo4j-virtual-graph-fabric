@@ -1,0 +1,10 @@
+.env
+logs/
+data/out/
+vg/lib/
+# rendered from .env by scripts/03-start-vg.sh
+vg/home/datasource.json
+vg/home/secret.json
+router/keystore/
+__pycache__/
+.DS_Store

@@ -1,0 +1,340 @@
+{
+  "catalog": "contracts_wh",
+  "schema": "dbo",
+  "entities": {
+    "nodes": [
+      {
+        "label": "Supplier",
+        "table": "suppliers",
+        "properties": [
+          {
+            "name": "supplier_id",
+            "column": "supplier_id",
+            "type": "STRING"
+          },
+          {
+            "name": "name",
+            "column": "name",
+            "type": "STRING"
+          },
+          {
+            "name": "country",
+            "column": "country",
+            "type": "STRING"
+          },
+          {
+            "name": "risk_rating",
+            "column": "risk_rating",
+            "type": "STRING"
+          },
+          {
+            "name": "onboarded_on",
+            "column": "onboarded_on",
+            "type": "DATE"
+          }
+        ],
+        "key": [
+          {
+            "column": "supplier_id"
+          }
+        ]
+      },
+      {
+        "label": "PurchaseOrder",
+        "table": "purchase_orders",
+        "properties": [
+          {
+            "name": "po_id",
+            "column": "po_id",
+            "type": "STRING"
+          },
+          {
+            "name": "contract_id",
+            "column": "contract_id",
+            "type": "STRING"
+          },
+          {
+            "name": "order_date",
+            "column": "order_date",
+            "type": "DATE"
+          },
+          {
+            "name": "amount",
+            "column": "amount",
+            "type": "FLOAT"
+          },
+          {
+            "name": "currency",
+            "column": "currency",
+            "type": "STRING"
+          },
+          {
+            "name": "status",
+            "column": "status",
+            "type": "STRING"
+          }
+        ],
+        "key": [
+          {
+            "column": "po_id"
+          }
+        ]
+      },
+      {
+        "label": "Invoice",
+        "table": "invoices",
+        "properties": [
+          {
+            "name": "invoice_id",
+            "column": "invoice_id",
+            "type": "STRING"
+          },
+          {
+            "name": "invoice_date",
+            "column": "invoice_date",
+            "type": "DATE"
+          },
+          {
+            "name": "due_date",
+            "column": "due_date",
+            "type": "DATE"
+          },
+          {
+            "name": "amount",
+            "column": "amount",
+            "type": "FLOAT"
+          },
+          {
+            "name": "status",
+            "column": "status",
+            "type": "STRING"
+          }
+        ],
+        "key": [
+          {
+            "column": "invoice_id"
+          }
+        ]
+      },
+      {
+        "label": "Payment",
+        "table": "payments",
+        "properties": [
+          {
+            "name": "payment_id",
+            "column": "payment_id",
+            "type": "STRING"
+          },
+          {
+            "name": "paid_on",
+            "column": "paid_on",
+            "type": "DATE"
+          },
+          {
+            "name": "amount",
+            "column": "amount",
+            "type": "FLOAT"
+          },
+          {
+            "name": "method",
+            "column": "method",
+            "type": "STRING"
+          }
+        ],
+        "key": [
+          {
+            "column": "payment_id"
+          }
+        ]
+      },
+      {
+        "label": "Delivery",
+        "table": "deliveries",
+        "properties": [
+          {
+            "name": "delivery_id",
+            "column": "delivery_id",
+            "type": "STRING"
+          },
+          {
+            "name": "delivered_on",
+            "column": "delivered_on",
+            "type": "DATE"
+          },
+          {
+            "name": "on_time",
+            "column": "on_time",
+            "type": "BOOLEAN"
+          },
+          {
+            "name": "quantity",
+            "column": "quantity",
+            "type": "INTEGER"
+          }
+        ],
+        "key": [
+          {
+            "column": "delivery_id"
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "label": "RECEIVED",
+        "table": "purchase_orders",
+        "properties": [],
+        "key": [
+          {
+            "column": "po_id"
+          },
+          {
+            "column": "supplier_id"
+          }
+        ],
+        "start": {
+          "targetEntity": "Supplier",
+          "keys": [
+            {
+              "nodeColumn": "supplier_id",
+              "relationshipColumn": "supplier_id"
+            }
+          ]
+        },
+        "end": {
+          "targetEntity": "PurchaseOrder",
+          "keys": [
+            {
+              "nodeColumn": "po_id",
+              "relationshipColumn": "po_id"
+            }
+          ]
+        }
+      },
+      {
+        "label": "ISSUED",
+        "table": "invoices",
+        "properties": [],
+        "key": [
+          {
+            "column": "invoice_id"
+          },
+          {
+            "column": "supplier_id"
+          }
+        ],
+        "start": {
+          "targetEntity": "Supplier",
+          "keys": [
+            {
+              "nodeColumn": "supplier_id",
+              "relationshipColumn": "supplier_id"
+            }
+          ]
+        },
+        "end": {
+          "targetEntity": "Invoice",
+          "keys": [
+            {
+              "nodeColumn": "invoice_id",
+              "relationshipColumn": "invoice_id"
+            }
+          ]
+        }
+      },
+      {
+        "label": "FOR_PO",
+        "table": "invoices",
+        "properties": [],
+        "key": [
+          {
+            "column": "invoice_id"
+          },
+          {
+            "column": "po_id"
+          }
+        ],
+        "start": {
+          "targetEntity": "Invoice",
+          "keys": [
+            {
+              "nodeColumn": "invoice_id",
+              "relationshipColumn": "invoice_id"
+            }
+          ]
+        },
+        "end": {
+          "targetEntity": "PurchaseOrder",
+          "keys": [
+            {
+              "nodeColumn": "po_id",
+              "relationshipColumn": "po_id"
+            }
+          ]
+        }
+      },
+      {
+        "label": "SETTLES",
+        "table": "payments",
+        "properties": [],
+        "key": [
+          {
+            "column": "payment_id"
+          },
+          {
+            "column": "invoice_id"
+          }
+        ],
+        "start": {
+          "targetEntity": "Payment",
+          "keys": [
+            {
+              "nodeColumn": "payment_id",
+              "relationshipColumn": "payment_id"
+            }
+          ]
+        },
+        "end": {
+          "targetEntity": "Invoice",
+          "keys": [
+            {
+              "nodeColumn": "invoice_id",
+              "relationshipColumn": "invoice_id"
+            }
+          ]
+        }
+      },
+      {
+        "label": "DELIVERS",
+        "table": "deliveries",
+        "properties": [],
+        "key": [
+          {
+            "column": "delivery_id"
+          },
+          {
+            "column": "po_id"
+          }
+        ],
+        "start": {
+          "targetEntity": "Delivery",
+          "keys": [
+            {
+              "nodeColumn": "delivery_id",
+              "relationshipColumn": "delivery_id"
+            }
+          ]
+        },
+        "end": {
+          "targetEntity": "PurchaseOrder",
+          "keys": [
+            {
+              "nodeColumn": "po_id",
+              "relationshipColumn": "po_id"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
